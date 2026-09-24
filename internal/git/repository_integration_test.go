@@ -211,3 +211,13 @@ func TestResolveMainWorktreePath_RegularRepositoryUnchanged(t *testing.T) {
 
 	assert.Equal(t, repoDir, ResolveMainWorktreePath(repoDir))
 }
+
+func TestResolveMainWorktreePath_IgnoresInheritedGitEnv(t *testing.T) {
+	submoduleDir := setupSubmoduleRepo(t)
+	otherRepoDir := setupTestRepo(t)
+	t.Setenv("GIT_DIR", filepath.Join(otherRepoDir, ".git"))
+	t.Setenv("GIT_WORK_TREE", otherRepoDir)
+
+	gitDir := filepath.Join(filepath.Dir(submoduleDir), ".git", "modules", "sub")
+	assertSamePath(t, submoduleDir, ResolveMainWorktreePath(gitDir))
+}

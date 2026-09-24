@@ -90,6 +90,14 @@ func ResolveMainWorktreePath(path string) string {
 
 	cmd := exec.Command("git", "rev-parse", "--show-toplevel")
 	cmd.Dir = path
+	// An inherited GIT_DIR or GIT_WORK_TREE would make git ignore cmd.Dir
+	env := os.Environ()
+	cmd.Env = make([]string, 0, len(env))
+	for _, e := range env {
+		if !strings.HasPrefix(e, "GIT_DIR=") && !strings.HasPrefix(e, "GIT_WORK_TREE=") {
+			cmd.Env = append(cmd.Env, e)
+		}
+	}
 	output, err := cmd.Output()
 	if err != nil {
 		return path
